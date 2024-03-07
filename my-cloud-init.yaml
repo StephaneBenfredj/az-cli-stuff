@@ -1,0 +1,21 @@
+#cloud-config nn setup
+
+package_update: true
+package_upgrade: true
+
+packages:
+
+runcmd:
+  - DISKNAME=$(lsblk -o NAME,HCTL | grep -iE ^sd | grep " 1:" | cut -d' ' -f1)
+  - parted /dev/${DISKNAME} --script mklabel gpt mkpart ext4part1 ext4 0% 50% mkpart ext4part2 ext4 50% 100%
+  - sudo mkfs.ext4 /dev/${DISKNAME}1
+  - sudo partprobe /dev/${DISKNAME}1
+  - sudo mkfs.ext4 /dev/${DISKNAME}2
+  - sudo partprobe /dev/${DISKNAME}2
+  - sudo mount /dev/${DISKNAME}1 /opt
+  - ID1=$(blkid | grep ${DISKNAME}1 | cut -d' ' -f2)
+  - ID2=$(blkid | grep ${DISKNAME}2 | cut -d' ' -f2)
+  - echo "$ID1 /opt ext4 defaults,nofail 0 2" | sudo tee -a /etc/fstab
+  - sudo mkdir /var/lib/docker
+  - sudo mount /dev/${DISKNAME}2 /var/lib/docker
+  - echo "$ID2 /var/lib/docker ext4 defaults,nofail 0 2" | sudo tee -a /etc/fstab
