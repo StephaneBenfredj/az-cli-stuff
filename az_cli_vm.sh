@@ -47,7 +47,7 @@ az vm create \
     --eviction-policy Deallocate \
     --ssh-key-value $sshKey \
     --custom-data my-cloud-init.yaml \
-    --tags Owner=stephaneb Cleanup=False
+    --tags Owner=$owner Cleanup=False
 
 # Add autoshutdown policy
 az vm auto-shutdown -g $rgName -n "$vmName-$current_date" --time 2200 --email "youremail@zzzz.com"
